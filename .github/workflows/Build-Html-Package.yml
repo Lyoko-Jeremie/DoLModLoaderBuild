@@ -55,6 +55,7 @@ jobs:
           path: DoL
           ref: master
           github-server-url: 'https://gitgud.io'
+          token: ''
           submodules: recursive
 
 
