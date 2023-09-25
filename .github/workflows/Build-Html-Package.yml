@@ -51,7 +51,7 @@ jobs:
       - name: DoL
         uses: actions/checkout@v4
         with:
-          repository: Vrelnir/degrees-of-lewdity
+          repository: Vrelnir/degrees-of-lewdity.git
           path: DoL
           ref: master
           github-server-url: 'https://gitgud.io'
