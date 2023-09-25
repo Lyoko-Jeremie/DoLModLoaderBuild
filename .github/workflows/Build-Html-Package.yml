@@ -1,0 +1,205 @@
+
+name: Build Html Package
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+        os: [ ubuntu-latest, windows-latest ]
+        #os: [ ubuntu-latest, windows-latest ]
+        node-version: [ 18.x ]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: SugarCube-2
+        uses: actions/checkout@v4
+        with:
+          repository: https://github.com/Lyoko-Jeremie/sugarcube-2_Vrelnir.git
+          path: SC2
+          ref: TS
+          #submodules: recursive
+
+      - name: ModLoader
+        uses: actions/checkout@v4
+        with:
+          repository: https://github.com/Lyoko-Jeremie/sugarcube-2-ModLoader.git
+          path: ModLoader
+          ref: master
+          submodules: recursive
+
+      - name: DoL
+        uses: actions/checkout@v4
+        with:
+          repository: https://gitgud.io/Vrelnir/degrees-of-lewdity.git
+          path: DoL
+          ref: master
+          submodules: recursive
+
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # /ModLoader  Init =========================================
+
+      - name: Build ModLoader
+        working-directory: ${{ github.workspace }}/ModLoader
+        run: |
+          yarn install
+          yarn run ts:BeforeSC2
+          yarn run webpack:BeforeSC2
+          yarn run ts:ForSC2
+          yarn run webpack:insertTools
+
+      - name: Build ModLoaderGui
+        working-directory: ${{ github.workspace }}/ModLoader/mod/ModLoaderGui
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy ModLoaderGui
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/mod/ModLoaderGui/ModLoaderGui.mod.zip
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build ImageLoaderHook
+        working-directory: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy ImageLoaderHook
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook/ModLoader DoL ImageLoaderHook.mod.zip
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build ReplacePatch
+        working-directory: ${{ github.workspace }}/ModLoader/mod/ReplacePatch
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy ReplacePatch
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/mod/ReplacePatch/ReplacePatcher.mod.zip
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build TweeReplacer
+        working-directory: ${{ github.workspace }}/ModLoader/mod/TweeReplacer
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy TweeReplacer
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/mod/TweeReplacer/TweeReplacer.mod.zip
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build CheckDoLCompressorDictionaries
+        working-directory: ${{ github.workspace }}/ModLoader/mod/CheckDoLCompressorDictionaries
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy CheckDoLCompressorDictionaries
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/mod/CheckDoLCompressorDictionaries/CheckDoLCompressorDictionaries.mod.zip
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Copy dist-BeforeSC2
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/dist-BeforeSC2/**/*
+          target: ${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/
+      - name: Copy dist-ForSC2
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/dist-ForSC2/**/*
+          target: ${{ github.workspace }}/ModLoader/out/dist-ForSC2/
+      - name: Copy dist-insertTools
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/dist-insertTools/**/*
+          target: ${{ github.workspace }}/ModLoader/out/dist-insertTools/
+
+      - name: Copy README.md
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          source: ${{ github.workspace }}/ModLoader/README.md
+          target: ${{ github.workspace }}/ModLoader/out
+
+      # /ModLoader  OK =========================================
+
+      # /SC2  Init =========================================
+      - name: Build SC2
+        working-directory: ${{ github.workspace }}/SC2
+        run: |
+          npm install
+          node build.js -d -u -b 2
+      # /SC2  OK =========================================
+
+      - name: Copy SC2 format.js
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          one: "true"
+          source: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/format.js
+          target: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/format.js
+
+      # /DoL  Init =========================================
+
+      - name: Build DoL (Linux)
+        if: runner.os != 'Windows'
+        working-directory: ${{ github.workspace }}/DoL
+        run: compile.sh
+
+      - name: Build DoL (Win)
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/DoL
+        run: compile.bat
+
+      # /DoL  OK =========================================
+
+      - name: Inject ModLoader (Linux)
+        working-directory: ${{ github.workspace }}/ModLoader/out
+        run: |
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/insertModLoader.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/dist-BeforeSC2/BeforeSC2.js"
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: Html Package-${{ github.sha }}
+          path: |
+            ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.mod.html
+            ${{ github.workspace }}/DoL/style.css
+            ${{ github.workspace }}/DoL/img/
+            
+
+
+
