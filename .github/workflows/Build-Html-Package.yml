@@ -229,12 +229,15 @@ jobs:
           srcBase: ${{ github.workspace }}/DoL/
           source: ${{ github.workspace }}/DoL/style.css
           target: ${{ github.workspace }}/output
-      - name: Copy img
-        uses: Lyoko-Jeremie/js-copy-github-action@master
-        with:
-          srcBase: ${{ github.workspace }}/DoL/
-          source: ${{ github.workspace }}/DoL/img/**/*
-          target: ${{ github.workspace }}/output
+#      - name: Copy img
+#        uses: Lyoko-Jeremie/js-copy-github-action@master
+#        with:
+#          srcBase: ${{ github.workspace }}/DoL/
+#          source: ${{ github.workspace }}/DoL/img/**/*
+#          target: ${{ github.workspace }}/output
+      - name: Copy img (Win)
+        if: runner.os == 'Windows'
+        run: copy /Y ${{ github.workspace }}/DoL/img ${{ github.workspace }}/output
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.1
