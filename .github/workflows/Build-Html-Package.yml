@@ -252,7 +252,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Html Package-${{ github.sha }}
-          path: DoL-ModLoader-${{ github.sha }}.zip
+          path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
 
 
 
