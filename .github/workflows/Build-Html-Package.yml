@@ -189,10 +189,18 @@ jobs:
 
       # /DoL  OK =========================================
 
-      - name: Inject ModLoader (Linux)
+      - name: Upload debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: Html debug-${{ github.sha }}
+          path: |
+            ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/format.js
+            ${{ github.workspace }}/ModLoader/out/
+
+      - name: Inject ModLoader
         working-directory: ${{ github.workspace }}/ModLoader/out
         run: |
-          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insertModLoader.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/BeforeSC2.js"
+          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insert2html.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/BeforeSC2.js"
 
       - name: Upload
         uses: actions/upload-artifact@v3
