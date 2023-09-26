@@ -192,7 +192,7 @@ jobs:
       - name: Inject ModLoader (Linux)
         working-directory: ${{ github.workspace }}/ModLoader/out
         run: |
-          node "${{ github.workspace }}/ModLoader/dist-insertTools/insertModLoader.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/dist-BeforeSC2/BeforeSC2.js"
+          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insertModLoader.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/BeforeSC2.js"
 
       - name: Upload
         uses: actions/upload-artifact@v3
