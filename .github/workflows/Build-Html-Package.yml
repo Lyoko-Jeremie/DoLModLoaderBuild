@@ -79,7 +79,9 @@ jobs:
       - name: Copy ModLoaderGui
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
+          srcBase: ${{ github.workspace }}/ModLoader/mod/ModLoaderGui/
           source: ${{ github.workspace }}/ModLoader/mod/ModLoaderGui/ModLoaderGui.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
       - name: Build ImageLoaderHook
@@ -92,7 +94,9 @@ jobs:
       - name: Copy ImageLoaderHook
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
+          srcBase: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook/
           source: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook/ModLoader DoL ImageLoaderHook.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
       - name: Build ReplacePatch
@@ -105,7 +109,9 @@ jobs:
       - name: Copy ReplacePatch
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
+          srcBase: ${{ github.workspace }}/ModLoader/mod/ReplacePatch/
           source: ${{ github.workspace }}/ModLoader/mod/ReplacePatch/ReplacePatcher.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
       - name: Build TweeReplacer
@@ -118,7 +124,9 @@ jobs:
       - name: Copy TweeReplacer
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
+          srcBase: ${{ github.workspace }}/ModLoader/mod/TweeReplacer/
           source: ${{ github.workspace }}/ModLoader/mod/TweeReplacer/TweeReplacer.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
       - name: Build CheckDoLCompressorDictionaries
@@ -131,7 +139,9 @@ jobs:
       - name: Copy CheckDoLCompressorDictionaries
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
+          srcBase: ${{ github.workspace }}/ModLoader/mod/CheckDoLCompressorDictionaries/
           source: ${{ github.workspace }}/ModLoader/mod/CheckDoLCompressorDictionaries/CheckDoLCompressorDictionaries.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
       - name: Copy dist-BeforeSC2
