@@ -212,15 +212,45 @@ jobs:
         run: |
           node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insert2html.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/BeforeSC2.js"
 
+      # make package  Init =========================================
+      - name: MKDIR
+        run: |
+          mkdir ${{ github.workspace }}/output
+
+      - name: Copy html
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/DoL/
+          source: ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.mod.html
+          target: ${{ github.workspace }}/output
+      - name: Copy style
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/DoL/
+          source: ${{ github.workspace }}/DoL/style.css
+          target: ${{ github.workspace }}/output
+      - name: Copy img
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/DoL/
+          source: ${{ github.workspace }}/DoL/img/**/*
+          target: ${{ github.workspace }}/output
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: DoL-ModLoader-${{ github.sha }}.zip
+          directory: ${{ github.workspace }}/output
+
+      # make package  OK =========================================
+
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: Html Package-${{ github.sha }}
-          path: |
-            ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.mod.html
-            ${{ github.workspace }}/DoL/style.css
-            ${{ github.workspace }}/DoL/img/
-            
+          path: DoL-ModLoader.zip
+
 
 
 
