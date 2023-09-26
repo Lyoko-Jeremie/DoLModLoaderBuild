@@ -171,9 +171,9 @@ jobs:
         with:
           one: "true"
           srcBase: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/
-          source: format.js
+          source: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/format.js
           destBase: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/
-          target: format.js
+          target: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/format.js
 
       # /DoL  Init =========================================
 
