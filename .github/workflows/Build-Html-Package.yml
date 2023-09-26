@@ -79,7 +79,7 @@ jobs:
       - name: Copy ModLoaderGui
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
-          srcBase: ${{ github.workspace }}/ModLoader/mod/
+          srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/ModLoaderGui/ModLoaderGui.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
@@ -94,7 +94,7 @@ jobs:
       - name: Copy ImageLoaderHook
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
-          srcBase: ${{ github.workspace }}/ModLoader/mod/
+          srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook/ModLoader DoL ImageLoaderHook.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
@@ -109,7 +109,7 @@ jobs:
       - name: Copy ReplacePatch
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
-          srcBase: ${{ github.workspace }}/ModLoader/mod/
+          srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/ReplacePatch/ReplacePatcher.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
@@ -124,7 +124,7 @@ jobs:
       - name: Copy TweeReplacer
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
-          srcBase: ${{ github.workspace }}/ModLoader/mod/
+          srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/TweeReplacer/TweeReplacer.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
@@ -139,7 +139,7 @@ jobs:
       - name: Copy CheckDoLCompressorDictionaries
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
-          srcBase: ${{ github.workspace }}/ModLoader/mod/
+          srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/CheckDoLCompressorDictionaries/CheckDoLCompressorDictionaries.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
