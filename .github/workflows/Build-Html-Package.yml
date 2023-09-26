@@ -237,7 +237,7 @@ jobs:
 #          target: ${{ github.workspace }}/output
       - name: Copy img (Win)
         if: runner.os == 'Windows'
-        run: copy /Y ${{ github.workspace }}/DoL/img ${{ github.workspace }}/output
+        run: copy ${{ github.workspace }}/DoL/img ${{ github.workspace }}/output
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.1
