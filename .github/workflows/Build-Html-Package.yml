@@ -48,14 +48,14 @@ jobs:
           ref: master
           submodules: recursive
 
-      - name: DoL
-        uses: actions/checkout@v4
-        with:
-          repository: Vrelnir/degrees-of-lewdity.git
-          path: DoL
-          ref: master
-          github-server-url: 'https://gitgud.io'
-          submodules: recursive
+#      - name: DoL
+#        uses: actions/checkout@v4
+#        with:
+#          repository: Vrelnir/degrees-of-lewdity.git
+#          path: DoL
+#          ref: master
+#          github-server-url: 'https://gitgud.io'
+#          submodules: recursive
 
 
       # /ModLoader  Init =========================================
