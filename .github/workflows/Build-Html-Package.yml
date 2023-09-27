@@ -199,13 +199,13 @@ jobs:
 
       # /DoL  OK =========================================
 
-      - name: Upload debug
-        uses: actions/upload-artifact@v3
-        with:
-          name: Html debug-${{ github.sha }}
-          path: |
-            ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/format.js
-            ${{ github.workspace }}/ModLoader/out/
+#      - name: Upload debug
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: Html debug-${{ github.sha }}
+#          path: |
+#            ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/format.js
+#            ${{ github.workspace }}/ModLoader/out/
 
       - name: Inject ModLoader
         working-directory: ${{ github.workspace }}/ModLoader/out
