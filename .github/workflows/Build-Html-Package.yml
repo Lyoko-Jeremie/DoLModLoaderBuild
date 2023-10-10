@@ -40,6 +40,10 @@ jobs:
           ref: TS
           #submodules: recursive
 
+      - name: init ModLoader
+        working-directory: ${{ github.workspace }}/ModLoader
+        run: git submodule update --init --recursive
+
 #      - name: ModLoader
 #        uses: actions/checkout@v4
 #        with:
