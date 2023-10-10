@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: true
 
       - name: SugarCube-2
         uses: actions/checkout@v4
@@ -40,13 +40,13 @@ jobs:
           ref: TS
           #submodules: recursive
 
-      - name: ModLoader
-        uses: actions/checkout@v4
-        with:
-          repository: Lyoko-Jeremie/sugarcube-2-ModLoader
-          path: ModLoader
-          ref: master
-          submodules: recursive
+#      - name: ModLoader
+#        uses: actions/checkout@v4
+#        with:
+#          repository: Lyoko-Jeremie/sugarcube-2-ModLoader
+#          path: ModLoader
+#          ref: master
+#          submodules: recursive
 
 #      - name: DoL
 #        uses: actions/checkout@v4

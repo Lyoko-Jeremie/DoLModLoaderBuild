@@ -2,3 +2,7 @@
 	path = DOL
 	url = https://gitgud.io/Vrelnir/degrees-of-lewdity.git
 	branch = master
+[submodule "ModLoader"]
+	path = ModLoader
+	url = ../sugarcube-2-ModLoader.git
+	branch = master
