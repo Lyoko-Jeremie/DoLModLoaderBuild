@@ -300,17 +300,21 @@ jobs:
 
       # make package  OK =========================================
 
-      # - name: Upload
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Html Package-${{ github.sha }}
-      #     path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: Html Package-${{ github.sha }}
+          path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+
+      - name: Get Current Time
+        id: date
+        run: echo "::set-output name=date::$(date + '%Y%m%d%H%M%S')"
 
       - name: Archive Release (Releases Manually)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          files: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+          files: ${{ github.workspace }}\\output\\DoL-ModLoader-${{ github.sha }}.zip
           name: Release v${{ github.event.inputs.version }}
           tag_name: v${{ github.event.inputs.version }}-${{ github.sha }}
           body: Release v${{ github.event.inputs.version }}-${{ github.sha }}v
@@ -319,7 +323,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
-          files: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+          files: ${{ github.workspace }}\\output\\DoL-ModLoader-${{ github.sha }}.zip
           name: Auto Release (${{ github.sha }})
           tag_name: auto-${{ github.sha }}
           body: Auto Release (${{ github.sha }})
