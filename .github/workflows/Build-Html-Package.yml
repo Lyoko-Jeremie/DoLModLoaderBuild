@@ -307,8 +307,11 @@ jobs:
           path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
 
       - name: Get Current Time
-        id: date
-        run: echo "::set-output name=date::$(date + '%Y%m%d')"
+        id: time
+        uses: nanzm/get-time-action@master
+        with:
+          timeZone: UTC+8
+          format: 'YYYY-MM-DD'
 
       - name: Archive Release (Releases Manually)
         uses: softprops/action-gh-release@v1
@@ -324,7 +327,7 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           files: ${{ github.workspace }}\\output\\DoL-ModLoader-${{ github.sha }}.zip
-          name: Auto Release on ${{ steps.date.outputs.date }} (${{ github.sha }})
-          tag_name: auto-${{ github.sha }}-${{ steps.date.outputs.date }}
-          body: Auto Release on ${{ steps.date.outputs.date }} (${{ github.sha }})
+          name: Auto Release on ${{ steps.time.outputs.time }} (${{ github.sha }})
+          tag_name: auto-${{ github.sha }}-${{ steps.time.outputs.time }}
+          body: Auto Release on ${{ steps.time.outputs.time }} (${{ github.sha }})
           prerelease: true
