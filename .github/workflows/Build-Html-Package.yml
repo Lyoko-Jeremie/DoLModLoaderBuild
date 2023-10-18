@@ -308,7 +308,7 @@ jobs:
 
       - name: Get Current Time
         id: date
-        run: echo "::set-output name=date::$(date + '%Y%m%d%H%M%S')"
+        run: echo "::set-output name=date::$(date + '%Y%m%d')"
 
       - name: Archive Release (Releases Manually)
         uses: softprops/action-gh-release@v1
@@ -317,14 +317,14 @@ jobs:
           files: ${{ github.workspace }}\\output\\DoL-ModLoader-${{ github.sha }}.zip
           name: Release v${{ github.event.inputs.version }}
           tag_name: v${{ github.event.inputs.version }}-${{ github.sha }}
-          body: Release v${{ github.event.inputs.version }}-${{ github.sha }}v
+          body: Release v${{ github.event.inputs.version }}-${{ github.sha }}
 
       - name: Archive Release (Releases Auto)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           files: ${{ github.workspace }}\\output\\DoL-ModLoader-${{ github.sha }}.zip
-          name: Auto Release (${{ github.sha }})
-          tag_name: auto-${{ github.sha }}
-          body: Auto Release (${{ github.sha }})
+          name: Auto Release on ${{ steps.date.outputs.date }} (${{ github.sha }})
+          tag_name: auto-${{ github.sha }}-${{ steps.date.outputs.date }}
+          body: Auto Release on ${{ steps.date.outputs.date }} (${{ github.sha }})
           prerelease: true
