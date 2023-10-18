@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
+    inputs:
+      version:
+        description: 手动设定版本
 
 jobs:
   build:
@@ -273,7 +276,7 @@ jobs:
         if: runner.os == 'Windows'
         run: copy -Path "${{ github.workspace }}/DoL/img" -Destination "${{ github.workspace }}/output" -Recurse
 
-      - name: Archive Release
+      - name: Archive Release (Artifact)
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
@@ -282,12 +285,27 @@ jobs:
 
       # make package  OK =========================================
 
-      - name: Upload
-        uses: actions/upload-artifact@v3
+      # - name: Upload
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Html Package-${{ github.sha }}
+      #     path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+
+      - name: Archive Release (Releases Manually)
+        uses: softprops/action-gh-release@v1
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          name: Html Package-${{ github.sha }}
-          path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+          files: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+          name: Release v${{ github.event.inputs.version }}
+          tag_name: v${{ github.event.inputs.version }}-${{ github.sha }}
+          body: Release v${{ github.event.inputs.version }}-${{ github.sha }}v
 
-
-
-
+      - name: Archive Release (Releases Auto)
+        uses: softprops/action-gh-release@v1
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        with:
+          files: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
+          name: Auto Release (${{ github.sha }})
+          tag_name: auto-${{ github.sha }}
+          body: Auto Release (${{ github.sha }})
+          prerelease: true
