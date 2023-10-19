@@ -8,7 +8,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 手动设定版本
+        description: "手动设定版本"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
 
 jobs:
   build:
