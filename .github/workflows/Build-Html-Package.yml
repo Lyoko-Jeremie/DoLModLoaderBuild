@@ -311,7 +311,7 @@ jobs:
         uses: nanzm/get-time-action@master
         with:
           timeZone: UTC+8
-          format: 'YYYY-MM-DD'
+          format: 'YYYY-MM-DD-HH-mm-ss'
 
       - name: Archive Release (Releases Manually)
         uses: softprops/action-gh-release@v1
