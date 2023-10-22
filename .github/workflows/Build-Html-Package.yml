@@ -172,6 +172,21 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Build ConflictChecker
+        working-directory: ${{ github.workspace }}/ModLoader/mod/ConflictChecker
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy ConflictChecker
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/ConflictChecker/ConflictChecker.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
       - name: Build ReplacePatch
         working-directory: ${{ github.workspace }}/ModLoader/mod/ReplacePatch
         run: |
