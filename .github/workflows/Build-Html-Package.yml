@@ -187,6 +187,21 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Build SweetAlert2Mod
+        working-directory: ${{ github.workspace }}/ModLoader/mod/SweetAlert2Mod
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy SweetAlert2Mod
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/SweetAlert2Mod/SweetAlert2Mod.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
       - name: Build ReplacePatch
         working-directory: ${{ github.workspace }}/ModLoader/mod/ReplacePatch
         run: |
