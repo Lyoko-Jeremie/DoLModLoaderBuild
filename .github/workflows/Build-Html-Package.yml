@@ -279,6 +279,42 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Build GameOriginalImagePack
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+      # copy game img , change boot.json GameVersion
+      - name: Copy img (Win)
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
+        run: copy -Path "${{ github.workspace }}/DoL/img" -Destination "${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack" -Recurse
+      - name: ReadGameVersion
+        id: ReadGameVersion
+        working-directory: ${{ github.workspace }}
+        run: |
+          node "${{ github.workspace }}/readGameVersion.js "${{ github.workspace }}/DOL/game/01-config/sugarcubeConfig.js"
+      # now we get the ${{ steps.ReadGameVersion.outputs.GameVersionString }}
+      - name: Build GameOriginalImagePack
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
+        run: |
+          node "${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack/dist-tools/bootJsonFillTool.js" "boot.json" "img" "${{ steps.ReadGameVersion.outputs.GameVersionString }}"
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: MKDIR
+        run: |
+          mkdir ${{ github.workspace }}/out-GameOriginalImagePack
+      - name: Copy GameOriginalImagePack
+        if: runner.os == 'Windows'
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack/GameOriginalImagePack.mod.zip
+          destBase: ${{ github.workspace }}/out-GameOriginalImagePack
+          target: ${{ github.workspace }}/out-GameOriginalImagePack
+
       - name: Copy dist-BeforeSC2
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
@@ -403,6 +439,12 @@ jobs:
           directory: ${{ github.workspace }}/output
 
       # make package  OK =========================================
+
+      - name: Upload GameOriginalImagePack.mod.zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: GameOriginalImagePack-mod-${{ github.sha }}
+          path: ${{ github.workspace }}/out-GameOriginalImagePack/GameOriginalImagePack.mod.zip
 
       - name: Upload
         uses: actions/upload-artifact@v3
