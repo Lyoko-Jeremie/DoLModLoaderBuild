@@ -279,6 +279,13 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Checkout GameOriginalImagePack
+        uses: actions/checkout@v4
+        with:
+          repository: Lyoko-Jeremie/DoLModLoaderBuild
+          path: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
+          ref: master
+          #submodules: recursive
       - name: Build GameOriginalImagePack
         if: runner.os == 'Windows'
         working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
