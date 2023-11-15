@@ -282,7 +282,7 @@ jobs:
       - name: Checkout GameOriginalImagePack
         uses: actions/checkout@v4
         with:
-          repository: Lyoko-Jeremie/DoLModLoaderBuild
+          repository: Lyoko-Jeremie/GameOriginalImagePackMod
           path: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
           ref: master
           #submodules: recursive
