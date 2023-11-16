@@ -293,6 +293,7 @@ jobs:
           yarn install
           yarn run build:ts
           yarn run build:webpack
+          yarn run build:tools
       # copy game img , change boot.json GameVersion
       - name: Copy img (Win)
         if: runner.os == 'Windows'
@@ -304,7 +305,7 @@ jobs:
         run: |
           node "${{ github.workspace }}/readGameVersion.js" "${{ github.workspace }}/DOL/game/01-config/sugarcubeConfig.js"
       # now we get the ${{ steps.ReadGameVersion.outputs.GameVersionString }}
-      - name: Build GameOriginalImagePack
+      - name: Make GameOriginalImagePack
         if: runner.os == 'Windows'
         working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
         run: |
