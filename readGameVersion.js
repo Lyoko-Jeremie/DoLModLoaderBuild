@@ -22,7 +22,7 @@ function setOutput(key, value) {
     }
     const GameSugarCubeConfigJsF = await (util.promisify(fs.readFile)(GameSugarCubeConfigJsFilePath, {encoding: 'utf-8'}));
 
-    const findR = GameSugarCubeConfigJsF.exec(/version: {0,}"([^"]+)"/);
+    const findR = RegExp(/version: {0,}"([^"]+)"/).exec(GameSugarCubeConfigJsF);
     if (!findR) {
         console.error('cannot find version reg');
         process.exit(1);
