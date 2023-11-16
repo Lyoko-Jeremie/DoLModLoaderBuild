@@ -297,7 +297,7 @@ jobs:
       - name: Copy img (Win)
         if: runner.os == 'Windows'
         working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
-        run: copy -Path "${{ github.workspace }}/DoL/img" -Destination "${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack" -Recurse
+        run: copy -Path "${{ github.workspace }}/DoL/img" -Destination "${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack" -Recurse -Force
       - name: ReadGameVersion
         id: ReadGameVersion
         working-directory: ${{ github.workspace }}
