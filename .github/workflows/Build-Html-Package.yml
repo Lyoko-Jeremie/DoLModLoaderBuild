@@ -279,6 +279,7 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      # ========= make GameOriginalImagePack =========
       - name: Checkout GameOriginalImagePack
         uses: actions/checkout@v4
         with:
@@ -309,7 +310,7 @@ jobs:
         if: runner.os == 'Windows'
         working-directory: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
         run: |
-          node "${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack/dist-tools/bootJsonFillTool.js" "boot.json" "img" "${{ steps.ReadGameVersion.outputs.GameVersionString }}"
+          node "${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack/dist-tools/bootJsonFillTool.js" "bootTemplate.json" "img" "${{ steps.ReadGameVersion.outputs.GameVersionString }}"
           node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
       - name: MKDIR
         run: |
@@ -322,6 +323,7 @@ jobs:
           source: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack/GameOriginalImagePack.mod.zip
           destBase: ${{ github.workspace }}/out-GameOriginalImagePack
           target: ${{ github.workspace }}/out-GameOriginalImagePack
+      # ========= make GameOriginalImagePack ok =========
 
       - name: Copy dist-BeforeSC2
         uses: Lyoko-Jeremie/js-copy-github-action@master
@@ -471,7 +473,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          files: output/DoL-ModLoader-${{ github.sha }}.zip
+          files: |
+            output/DoL-ModLoader-${{ github.sha }}.zip
+            out-GameOriginalImagePack/GameOriginalImagePack.mod.zip
           name: Release v${{ github.event.inputs.version }}
           tag_name: v${{ github.event.inputs.version }}-${{ github.sha }}
           body: Release v${{ github.event.inputs.version }}-${{ github.sha }}
@@ -480,7 +484,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
-          files: output/DoL-ModLoader-${{ github.sha }}.zip
+          files: |
+            output/DoL-ModLoader-${{ github.sha }}.zip
+            out-GameOriginalImagePack/GameOriginalImagePack.mod.zip
           name: Auto Release on ${{ steps.time.outputs.time }} (${{ github.sha }})
           tag_name: auto-${{ github.sha }}-${{ steps.time.outputs.time }}
           body: Auto Release on ${{ steps.time.outputs.time }} (${{ github.sha }})
