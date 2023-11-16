@@ -302,7 +302,7 @@ jobs:
         id: ReadGameVersion
         working-directory: ${{ github.workspace }}
         run: |
-          node "${{ github.workspace }}/readGameVersion.js "${{ github.workspace }}/DOL/game/01-config/sugarcubeConfig.js"
+          node "${{ github.workspace }}/readGameVersion.js" "${{ github.workspace }}/DOL/game/01-config/sugarcubeConfig.js"
       # now we get the ${{ steps.ReadGameVersion.outputs.GameVersionString }}
       - name: Build GameOriginalImagePack
         if: runner.os == 'Windows'
