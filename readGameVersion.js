@@ -1,5 +1,6 @@
-const os = require("os")
-const fs = require("fs")
+const os = require("os");
+const fs = require("fs");
+const util = require("util");
 
 function setOutput(key, value) {
     // Temporary hack until core actions library catches up with github new recommendations
@@ -19,7 +20,7 @@ function setOutput(key, value) {
         process.exit(1);
         return;
     }
-    const GameSugarCubeConfigJsF = await promisify(readFile)(GameSugarCubeConfigJsFilePath, {encoding: 'utf-8'});
+    const GameSugarCubeConfigJsF = await (util.promisify(fs.readFile)(GameSugarCubeConfigJsFilePath, {encoding: 'utf-8'}));
 
     const findR = GameSugarCubeConfigJsF.exec(/version: {0,}"([^"]+)"/);
     if (!findR) {
