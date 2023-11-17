@@ -234,6 +234,23 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      # TweeReplacerLinker must build before `TweeReplacer` and `I18nTweeReplacer`
+      - name: Build TweeReplacerLinker
+        working-directory: ${{ github.workspace }}/ModLoader/mod/TweeReplacerLinker
+        run: |
+          yarn install
+          yarn run ts:type
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy TweeReplacerLinker
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/TweeReplacerLinker/TweeReplacerLinker.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
       - name: Build TweeReplacer
         working-directory: ${{ github.workspace }}/ModLoader/mod/TweeReplacer
         run: |
@@ -246,6 +263,21 @@ jobs:
         with:
           srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/TweeReplacer/TweeReplacer.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build I18nTweeReplacer
+        working-directory: ${{ github.workspace }}/ModLoader/mod/I18nTweeReplacer
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy I18nTweeReplacer
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/I18nTweeReplacer/I18nTweeReplacer.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
@@ -276,21 +308,6 @@ jobs:
         with:
           srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/ModuleCssReplacer/ModuleCssReplacer.mod.zip
-          destBase: ${{ github.workspace }}/ModLoader/out
-          target: ${{ github.workspace }}/ModLoader/out
-
-      - name: Build I18nTweeReplacer
-        working-directory: ${{ github.workspace }}/ModLoader/mod/I18nTweeReplacer
-        run: |
-          yarn install
-          yarn run build:ts
-          yarn run build:webpack
-          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
-      - name: Copy I18nTweeReplacer
-        uses: Lyoko-Jeremie/js-copy-github-action@master
-        with:
-          srcBase: ${{ github.workspace }}/ModLoader/
-          source: ${{ github.workspace }}/ModLoader/mod/I18nTweeReplacer/I18nTweeReplacer.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
