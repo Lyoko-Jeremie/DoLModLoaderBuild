@@ -501,12 +501,17 @@ jobs:
           timeZone: UTC+8
           format: 'YYYY-MM-DD-HH-mm-ss'
 
+      - name: Rename Archive (Manually)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          mv "output/DoL-ModLoader-${{ github.sha }}.zip" "output/DoL-ModLoader-${{ github.event.inputs.version }}-${{ github.sha }}.zip"
+
       - name: Archive Release (Releases Manually)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
           files: |
-            output/DoL-ModLoader-${{ github.sha }}.zip
+            output/DoL-ModLoader-${{ github.event.inputs.version }}-${{ github.sha }}.zip
             out-GameOriginalImagePack/GameOriginalImagePack.mod.zip
           name: Release v${{ github.event.inputs.version }}
           tag_name: v${{ github.event.inputs.version }}-${{ github.sha }}
