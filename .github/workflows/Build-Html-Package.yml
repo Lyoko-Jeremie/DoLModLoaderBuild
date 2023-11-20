@@ -37,6 +37,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: corepack enable
+        run: corepack enable
+
       - uses: actions/checkout@v4
         with:
           submodules: true
