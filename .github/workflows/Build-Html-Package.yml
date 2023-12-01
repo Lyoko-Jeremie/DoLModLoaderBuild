@@ -1,5 +1,7 @@
 name: Build Html Package
 
+run-name: Build Version ${{ inputs.version }}
+
 on:
   push:
     branches: [ "master" ]
