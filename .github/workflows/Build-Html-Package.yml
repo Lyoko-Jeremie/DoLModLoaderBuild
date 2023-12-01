@@ -1,6 +1,4 @@
-name: Build Html Package
-
-run-name: Build Version ${{ inputs.version }}
+name: Build ModLoader ${{ inputs.version }}
 
 on:
   push:
@@ -11,6 +9,7 @@ on:
     inputs:
       version:
         description: "手动设定版本"
+
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
