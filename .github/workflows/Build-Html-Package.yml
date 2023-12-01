@@ -1,4 +1,6 @@
-name: Build ModLoader ${{ inputs.version }}
+name: Build ModLoader
+
+run-name: Build ModLoader ${{ inputs.version }}
 
 on:
   push:
