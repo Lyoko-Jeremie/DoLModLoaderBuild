@@ -270,6 +270,21 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Build TweePrefixPostfixAddon
+        working-directory: ${{ github.workspace }}/ModLoader/mod/TweePrefixPostfixAddon
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy TweePrefixPostfixAddon
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/TweePrefixPostfixAddon/TweePrefixPostfixAddon.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
       # TweeReplacerLinker must build before `TweeReplacer` and `I18nTweeReplacer`
       - name: Build TweeReplacerLinker
         working-directory: ${{ github.workspace }}/ModLoader/mod/TweeReplacerLinker
@@ -359,6 +374,18 @@ jobs:
         with:
           srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/BeautySelectorAddon/BeautySelectorAddon.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build DoLHookWidget
+        working-directory: ${{ github.workspace }}/ModLoader/mod/DoLHookWidget
+        run: |
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy DoLHookWidget
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/DoLHookWidget/DoLHookWidget.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
