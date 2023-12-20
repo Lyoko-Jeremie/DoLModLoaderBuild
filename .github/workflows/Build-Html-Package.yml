@@ -198,6 +198,21 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Build ModdedHairAddon
+        working-directory: ${{ github.workspace }}/ModLoader/mod/ModdedHairAddon
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy ModdedHairAddon
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/ModdedHairAddon/ModdedHairAddon.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
       - name: Build ConflictChecker
         working-directory: ${{ github.workspace }}/ModLoader/mod/ConflictChecker
         run: |
