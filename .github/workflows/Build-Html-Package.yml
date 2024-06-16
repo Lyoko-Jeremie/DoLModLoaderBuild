@@ -410,6 +410,9 @@ jobs:
       - name: Build DoLLinkButtonFilter
         working-directory: ${{ github.workspace }}/ModLoader/mod/DoLLinkButtonFilter
         run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
           node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
       - name: Copy DoLHookWidget
         uses: Lyoko-Jeremie/js-copy-github-action@master
