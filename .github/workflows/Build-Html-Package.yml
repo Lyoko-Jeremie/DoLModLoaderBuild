@@ -407,6 +407,18 @@ jobs:
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
+      - name: Build DoLLinkButtonFilter
+        working-directory: ${{ github.workspace }}/ModLoader/mod/DoLLinkButtonFilter
+        run: |
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy DoLHookWidget
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/DoLLinkButtonFilter/DoLLinkButtonFilter.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
       # ========= make GameOriginalImagePack =========
       - name: Checkout GameOriginalImagePack
         uses: actions/checkout@v4
