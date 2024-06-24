@@ -3,13 +3,13 @@ name: Build ModLoader
 run-name: Build ModLoader ${{ inputs.version }}
 
 on:
-  push:
-    branches:
-      - "master"
-      - "*test*"
-  pull_request:
-    branches:
-      - "master"
+#  push:
+#    branches:
+#      - "master"
+#      - "*test*"
+#  pull_request:
+#    branches:
+#      - "master"
   workflow_dispatch:
     inputs:
       version:
