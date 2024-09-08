@@ -17,5 +17,10 @@ This repository is for automatic building of the DoL game with ModLoader include
 If you wish to play on Android, you can use any file explorer to unzip and click the html file, and open the html file with any browser you prefer.
 If you encounter issues with images not displaying, please load `GameOriginalImagePack.mod.zip`. This `GameOriginalImagePack` mod contains all the original images from the base game and should always be loaded last in the mod list.
 
+---
 
+### Update Submodules (ModLoader & DoL) / 更新模组管理器和游戏本体源码
+```shell
+git submodule update --init --remote --recursive
+```
 
