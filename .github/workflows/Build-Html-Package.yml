@@ -129,12 +129,21 @@ jobs:
           yarn install
           yarn run build:ts
           yarn run build:webpack
+          yarn run build-core:webpack
           node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot-core.json"
       - name: Copy ImageLoaderHook
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
           srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook/ModLoader DoL ImageLoaderHook.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+      - name: Copy ImageLoaderHook
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook/ModLoader ImageLoaderHookCore.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
@@ -449,6 +458,21 @@ jobs:
         with:
           srcBase: ${{ github.workspace }}/ModLoader/
           source: ${{ github.workspace }}/ModLoader/mod/HookMacroRng/HookMacroRng.mod.zip
+          destBase: ${{ github.workspace }}/ModLoader/out
+          target: ${{ github.workspace }}/ModLoader/out
+
+      - name: Build ImageLoaderHook2BeautySelectorAddon
+        working-directory: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook2BeautySelectorAddon
+        run: |
+          yarn install
+          yarn run build:ts
+          yarn run build:webpack
+          node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+      - name: Copy ImageLoaderHook2BeautySelectorAddon
+        uses: Lyoko-Jeremie/js-copy-github-action@master
+        with:
+          srcBase: ${{ github.workspace }}/ModLoader/
+          source: ${{ github.workspace }}/ModLoader/mod/ImageLoaderHook2BeautySelectorAddon/ImageLoaderHook2BeautySelectorAddon.mod.zip
           destBase: ${{ github.workspace }}/ModLoader/out
           target: ${{ github.workspace }}/ModLoader/out
 
