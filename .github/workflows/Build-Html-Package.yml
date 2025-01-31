@@ -648,13 +648,13 @@ jobs:
       # make package  OK =========================================
 
       - name: Upload GameOriginalImagePack.mod.zip
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: GameOriginalImagePack-mod-${{ github.sha }}
           path: ${{ github.workspace }}/out-GameOriginalImagePack/GameOriginalImagePack.mod.zip
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Html Package-${{ github.sha }}
           path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
