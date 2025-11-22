@@ -55,7 +55,7 @@ jobs:
         with:
           repository: Lyoko-Jeremie/sugarcube-2_Vrelnir
           path: SC2
-          ref: TS
+          ref: TS2
           #submodules: recursive
 
       - name: init ModLoader
