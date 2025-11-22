@@ -49,6 +49,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+          token: ${{ secrets.GITGUD_TOKEN }}  # vrelnir/degrees-of-lewdity
 
       - name: SugarCube-2
         uses: actions/checkout@v4
