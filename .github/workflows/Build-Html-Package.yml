@@ -46,13 +46,13 @@ jobs:
       - name: corepack enable
         run: corepack enable
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
           token: ${{ secrets.GITGUD_TOKEN }}  # vrelnir/degrees-of-lewdity
 
       - name: SugarCube-2
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: Lyoko-Jeremie/sugarcube-2_Vrelnir
           path: SC2
