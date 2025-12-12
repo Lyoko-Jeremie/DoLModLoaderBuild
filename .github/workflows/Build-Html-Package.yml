@@ -39,20 +39,20 @@ jobs:
     steps:
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: corepack enable
         run: corepack enable
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
           # token: ${{ secrets.GITGUD_TOKEN }}  # vrelnir/degrees-of-lewdity
 
       - name: SugarCube-2
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: Lyoko-Jeremie/sugarcube-2_Vrelnir
           path: SC2
@@ -479,7 +479,7 @@ jobs:
 
       # ========= make GameOriginalImagePack =========
       - name: Checkout GameOriginalImagePack
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Lyoko-Jeremie/GameOriginalImagePackMod
           path: ${{ github.workspace }}/ModLoader/mod/GameOriginalImagePack
@@ -640,7 +640,7 @@ jobs:
         run: copy -Path "${{ github.workspace }}/DoL/img" -Destination "${{ github.workspace }}/output" -Recurse
 
       - name: Archive Release (Artifact)
-        uses: thedoctor0/zip-release@0.7.1
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: 'zip'
           filename: DoL-ModLoader-${{ github.sha }}.zip
@@ -649,13 +649,13 @@ jobs:
       # make package  OK =========================================
 
       - name: Upload GameOriginalImagePack.mod.zip
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: GameOriginalImagePack-mod-${{ github.sha }}
           path: ${{ github.workspace }}/out-GameOriginalImagePack/GameOriginalImagePack.mod.zip
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Html Package-${{ github.sha }}
           path: ${{ github.workspace }}/output/DoL-ModLoader-${{ github.sha }}.zip
