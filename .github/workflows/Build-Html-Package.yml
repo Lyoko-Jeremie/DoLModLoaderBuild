@@ -565,14 +565,14 @@ jobs:
           node build.js -d -u -b 2
       # /SC2  OK =========================================
 
-      - name: Copy SC2 format.js
-        uses: Lyoko-Jeremie/js-copy-github-action@master
-        with:
-          one: "true"
-          srcBase: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/
-          source: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/format.js
-          destBase: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/
-          target: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/
+#      - name: Copy SC2 format.js
+#        uses: Lyoko-Jeremie/js-copy-github-action@master
+#        with:
+#          one: "true"
+#          srcBase: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/
+#          source: ${{ github.workspace }}/SC2/build/twine2/sugarcube-2/format.js
+#          destBase: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/
+#          target: ${{ github.workspace }}/DoL/devTools/tweego/storyFormats/sugarcube-2/
 
       # /DoL  Init =========================================
 
@@ -585,6 +585,13 @@ jobs:
         if: runner.os == 'Windows'
         working-directory: ${{ github.workspace }}/DoL
         run: ./compile.bat
+
+      # /DoL patch SC2
+
+      - name: Patch SC2 In DoL Html
+        working-directory: ${{ github.workspace }}/DoL
+        run: |
+          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/sc2PatchTool.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "${{ github.workspace }}/SC2/locale/chs.js"
 
       # /DoL  OK =========================================
 
@@ -599,12 +606,12 @@ jobs:
       - name: Inject ModLoader
         working-directory: ${{ github.workspace }}/ModLoader/out
         run: |
-          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insert2html.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/BeforeSC2.js"
+          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insert2html.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.sc2patch.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2/BeforeSC2.js"
 
       - name: Inject ModLoader-compatibility
         working-directory: ${{ github.workspace }}/ModLoader/out
         run: |
-          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insert2html-polyfill.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2-comp/BeforeSC2.js" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2-comp/polyfillWebpack.js" "ManualPolyfill.js"
+          node "${{ github.workspace }}/ModLoader/out/dist-insertTools/insert2html-polyfill.js" "${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.sc2patch.html" "modList.json" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2-comp/BeforeSC2.js" "${{ github.workspace }}/ModLoader/out/dist-BeforeSC2-comp/polyfillWebpack.js" "ManualPolyfill.js"
 
       # make package  Init =========================================
       - name: MKDIR
@@ -615,13 +622,13 @@ jobs:
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
           srcBase: ${{ github.workspace }}/DoL/
-          source: ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.mod.html
+          source: ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.sc2patch.html.mod.html
           target: ${{ github.workspace }}/output
       - name: Copy html-compatibility
         uses: Lyoko-Jeremie/js-copy-github-action@master
         with:
           srcBase: ${{ github.workspace }}/DoL/
-          source: ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.mod-polyfill.html
+          source: ${{ github.workspace }}/DoL/Degrees of Lewdity VERSION.html.sc2patch.html.mod-polyfill.html
           target: ${{ github.workspace }}/output
 #      - name: Copy style
 #        uses: Lyoko-Jeremie/js-copy-github-action@master
