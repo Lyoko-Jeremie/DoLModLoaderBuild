@@ -93,6 +93,7 @@ img\...                                                          ← 游戏图�
 | `-Version <字符串>` | 等价于 `workflow_dispatch` 的 `version` 输入：额外生成 `DoL-ModLoader-<version>-<sha>.zip` 并复制到 `release\`。**不传时会交互式询问**，直接回车即跳过 |
 | `-Sha <字符串>` | 覆盖产物文件名中的 commit sha（默认取 `git rev-parse --short=8 HEAD`） |
 | `-SkipInit` | 跳过 `git submodule update` / clone SC2 / clone GameOriginalImagePack（离线或重复构建用） |
+| `-PinnedSubmodules` | 子模块**不**拉取最新版本，改用父仓库记录的那个 commit（复现历史构建用）。默认是更新到各子模块跟踪分支的最新 commit |
 | `-SkipYarnInstall` | 跳过所有 `yarn install`（`node_modules` 已就绪时大幅加速，**重复构建推荐**） |
 | `-SkipSc2` | 跳过 SC2 的 `npm install` + `build.js -d -u -b 2`（该产物不参与最终 HTML，见下方说明） |
 | `-SkipGameOriginalImagePack` | 跳过 GameOriginalImagePack 的下载与打包 |
@@ -120,7 +121,7 @@ img\...                                                          ← 游戏图�
 
 | # | 本地脚本 | 工作流 YAML |
 | --- | --- | --- |
-| 1 | `git submodule update --init --recursive`（仓库根 + `ModLoader`） | `actions/checkout@v6` (`submodules: true`) + `init ModLoader` |
+| 1 | `git submodule sync --recursive` + `git submodule update --init --recursive --remote`（仓库根 + `ModLoader`），并打印版本变化明细 | `actions/checkout@v6` (`submodules: true`) + `Update all submodules to latest remote` + `init ModLoader` |
 | 2 | `git clone/fetch SC2`（`Lyoko-Jeremie/sugarcube-2_Vrelnir@TS2`） | `SugarCube-2` (`actions/checkout`) |
 | 3 | `corepack yarn install` + `ts:BeforeSC2` / `webpack:BeforeSC2` / `webpack:BeforeSC2-comp` / `ts:ForSC2` / `webpack:insertTools` / `tras:babel` | `corepack enable` + `Build ModLoader` |
 | 4 | 逐个 mod：`yarn install` → `build:ts` / `build:webpack`（`TweeReplacerLinker` 另有 `ts:type`，`ImageLoaderHook` 另有 `build-core:webpack`）→ `node dist-insertTools\packModZip.js <boot.json>` | 各 `Build <Mod>` 步骤 |
@@ -135,7 +136,53 @@ img\...                                                          ← 游戏图�
 | 13 | 复制 2 个 HTML + `DoL\img` → `output\`，用 `System.IO.Compression` 打包 | `Copy html` / `Copy img (Win)` / `zip-release` |
 | 14 | 版本号重命名 + 复制到 `release\` | `Rename Archive (Manually)` + `action-gh-release` |
 
-几个与 CI 的**有意差异**（都是为了让本地构建更稳，不影响产物内容）：
+---
+
+## 5.1 子模块版本策略（重要）
+
+**问题**：`actions/checkout` 与 `git submodule update --init --recursive` 只会把子模块
+检出到**父仓库记录的那个 commit**（gitlink）。ModLoader 记录的这些 commit 可能已经
+落后于各子模块仓库的最新版本，例如本项目当前状态：
+
+| 子模块 | 父仓库记录的 commit | 远端 master 最新 |
+| --- | --- | --- |
+| `mod/ModLoaderGui` | `8494b7b6` | `41db3900` |
+| `mod/ModdedClothesAddon` | `09d116fc` | `a85701fd` |
+
+**现在的做法**：构建前给每个子模块执行 `fetch` 并检出其跟踪分支的最新 commit：
+
+```shell
+git submodule sync --recursive
+git submodule update --init --recursive --remote
+```
+
+- `--remote` 让 git 使用每个子模块在 `.gitmodules` 中声明的 `branch`；
+  ModLoader 的 28 个子模块里有 24 个显式写了 `branch = master`。
+  剩下 4 个没写 `branch`（`mod/i18n`、`mod/ModSubUiAngularJs`、`mod/CheckGameVersionCot`、
+  `mod/ImageLoaderHook2BeautySelectorAddon`）会回退到远端 `HEAD`，而这四个仓库的
+  `origin/HEAD` 都指向 `master`，所以结果一致。
+- `ModLoader` 自身被主仓库记录的 commit 是 `933b235`，恰好就是它 `origin/master` 的
+  最新 commit，所以不需要再额外更新它。
+- `--recursive` 只更新**内层**子模块的 commit，**不会**改变 `ModLoader` 自身被主仓库
+  记录的 commit（那取决于 `actions/checkout`）。
+- 每次构建都会在日志里打印版本变化明细，例如：
+
+  ```
+  OK   共 2 个子模块被更新到新版本:
+    * mod/ModdedClothesAddon  09d116fc -> a85701fd
+    * mod/ModLoaderGui  8494b7b6 -> 41db3900
+  ```
+
+**想复现历史版本**（使用父仓库记录的 commit）：本地加 `-PinnedSubmodules`；
+CI 里把新增的 `Update all submodules to latest remote` 步骤删掉或注释即可。
+
+> **注意**：`--remote` 也会把 `DOL`（游戏本体）更新到 gitgud.io 上 `master` 的最新
+> commit。如果你希望游戏本体固定、只更新 mod，请把根目录那次 `submodule update`
+> 的限制去掉 `--remote`，只保留 `ModLoader` 目录里的那次。
+
+---
+
+## 5.2 与 CI 的有意差异
 
 1. **不用 `corepack enable`**：它需要管理员权限写入 Node 安装目录。脚本改用
    `corepack yarn <命令>` 直接调用 `package.json` 中声明的 `yarn@3.4.1`，效果等价。
@@ -176,8 +223,15 @@ DoL 仓库在 `gitgud.io` 上，国内网络可能不稳定。可以：
 `-SkipInit -SkipYarnInstall`。若只是最后打包阶段失败，用 `-OnlyPackage`。
 
 **Q: `release\` 里怎么只有本次构建的文件？**
-每次构建都会先清理 `release\` 中上一次的 `DoL-ModLoader-*.zip`，避免把旧版本资产
-误上传到 GitHub Release。`GameOriginalImagePack.mod.zip` 每次都会被最新构建覆盖。
+每次构建只清理**本次要生成**的那几个同名资产（`DoL-ModLoader-<sha>.zip`、
+`DoL-ModLoader-<version>-<sha>.zip`、`GameOriginalImagePack.mod.zip`）后重新生成，
+避免旧版本被误上传；**其它文件（例如你手工放进去的说明文件或额外 mod）不会被删除**。
+
+**Q: 子模块更新到最新后，仓库里 `ModLoader` 显示为已修改？**
+正常现象。`git submodule update --remote` 会把子模块工作区切到最新 commit，
+于是父仓库里那个 gitlink 与工作区不一致，`git status` 会显示 `m ModLoader`。
+这只影响工作区，不会改动你已提交的内容；想恢复父仓库记录的版本执行
+`git submodule update --init --recursive`（或构建时加 `-PinnedSubmodules`）即可。
 
 **Q: 产物 zip 里两个 HTML 有什么区别？**
 `*.mod.html` 是普通版；`*.mod-polyfill.html` 额外内嵌了

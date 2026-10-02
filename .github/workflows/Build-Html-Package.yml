@@ -51,6 +51,18 @@ jobs:
           submodules: true
           # token: ${{ secrets.GITGUD_TOKEN }}  # vrelnir/degrees-of-lewdity
 
+      # actions/checkout 只会把子模块检出到主仓库记录的（可能是很旧的）commit。
+      # 这里显式拉取远端，把每个子模块都更新到其跟踪分支的最新 commit：
+      #   DOL / ModLoader  -> 各自 .gitmodules 中 branch = master
+      #   ModLoader 下的 28 个子模块 -> 递归更新到最新
+      # 注意：--recursive 只更新「内层子模块」的 commit，
+      #       不会改动 ModLoader 自身被主仓库记录的 commit（那是 checkout 决定的）。
+      - name: Update all submodules to latest remote
+        working-directory: ${{ github.workspace }}
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --remote
+
       - name: SugarCube-2
         uses: actions/checkout@v6
         with:
@@ -61,7 +73,9 @@ jobs:
 
       - name: init ModLoader
         working-directory: ${{ github.workspace }}/ModLoader
-        run: git submodule update --init --recursive
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --remote
 
 #      - name: ModLoader
 #        uses: actions/checkout@v4

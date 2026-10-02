@@ -6,6 +6,7 @@
 .DESCRIPTION
     本脚本逐步骤复刻 Build-Html-Package.yml（"Build ModLoader"）:
       * actions/checkout             -> git clone / git submodule update
+                                        并用 --remote 把每个子模块更新到最新 commit
       * actions/setup-node           -> 检查本机 Node.js 版本
       * corepack enable              -> corepack（自动下载 yarn 3.4.1）
       * Lyoko-Jeremie/js-copy-...    -> PowerShell 复制（保留目录层级）
@@ -18,6 +19,13 @@
         └─ img\...
       out-GameOriginalImagePack\GameOriginalImagePack.mod.zip
 
+    子模块版本策略（默认使用各子模块的**最新**版本）:
+      git submodule sync --recursive
+      git submodule update --init --recursive --remote
+    DOL / ModLoader 跟踪各自 .gitmodules 里的 branch = master；
+    ModLoader 下的 28 个子模块递归更新到最新。
+    如需改回「父仓库记录的那个 commit」，加 -PinnedSubmodules。
+
 .PARAMETER Version
     等价于工作流 workflow_dispatch 输入的 version（手动设定版本）。
     指定后会额外生成 output\DoL-ModLoader-<Version>-<sha>.zip，
@@ -28,6 +36,11 @@
 
 .PARAMETER SkipInit
     跳过 git clone / submodule 更新步骤（完全离线构建时使用）。
+
+.PARAMETER PinnedSubmodules
+    默认行为是给每个子模块执行 `git fetch` 并检出其跟踪分支的**最新** commit
+    （`git submodule update --init --recursive --remote`），与 CI 工作流一致。
+    加上本开关则改回旧行为：使用父仓库记录的那个 commit。
 
 .PARAMETER SkipYarnInstall
     跳过所有 yarn install（node_modules 已就绪时加快重复构建）。
@@ -44,7 +57,9 @@
     只做 "注入 + 打包" 阶段，复用上一次已经构建好的中间产物。
 
 .PARAMETER Clean
-    构建开始前删除 out\ 、output\ 、out-GameOriginalImagePack\ 等输出目录。
+    构建开始前清理生成物：ModLoader\out 下的 dist-* / mod / README.md、output\、
+    out-GameOriginalImagePack\ 以及 DoL 的 HTML 产物。只删生成物，受版本控制的
+    源文件（modList.json / ManualPolyfill.js / insert*.bat）会被保留。
 
 .EXAMPLE
     # 最常用：完整本地构建（不需要额外权限）
@@ -57,6 +72,10 @@
 .EXAMPLE
     # 第二次构建，源码没变，跳过下载依赖
     .\Build-ModLoader-Local.ps1 -SkipInit -SkipYarnInstall
+
+.EXAMPLE
+    # 使用父仓库记录的旧子模块 commit（复现历史版本）
+    .\Build-ModLoader-Local.ps1 -PinnedSubmodules
 #>
 
 [CmdletBinding()]
@@ -64,6 +83,7 @@ param(
     [string]$Version = '',
     [string]$Sha = '',
     [switch]$SkipInit,
+    [switch]$PinnedSubmodules,
     [switch]$SkipYarnInstall,
     [switch]$SkipSc2,
     [switch]$SkipGameOriginalImagePack,
@@ -247,6 +267,51 @@ function Remove-DirIfExists {
     }
 }
 
+function Get-SubmoduleRevisions {
+    <#  读取工作区中所有子模块当前检出的 commit。
+        等价于遍历 `git submodule status`（已初始化 / 会递归包含内层子模块）。
+        返回 @{ '相对路径' = @{ Sha = '...'; Note = '...' } } #>
+    param([Parameter(Mandatory)][string]$GitExe, [Parameter(Mandatory)][string]$BaseDir)
+
+    $map = @{}
+    $output = & $GitExe -C $BaseDir submodule status --recursive 2>$null
+    foreach ($line in $output) {
+        # 格式: [ |+|-|U]<sha1> <path> [(describe)]
+        if ($line -notmatch '^[\s+\-U]([0-9a-f]{40})\s+(\S+)(?:\s+\((.*)\))?') { continue }
+        $sha = $Matches[1]
+        $rel = $Matches[2]
+        $note = if ($Matches[3]) { $Matches[3] } else { '' }
+        # 去掉 ModLoader\ 前缀，让主仓库与 ModLoader 两次扫描的路径可以合并比较
+        $key = $rel -replace '^ModLoader[\\/]', ''
+        $map[$key] = @{ Sha = $sha; Note = $note }
+    }
+    return $map
+}
+
+function Format-SubmoduleDelta {
+    <#  对比更新前后的子模块 commit，输出「哪些子模块被移动到了新版本」 #>
+    param(
+        [Parameter(Mandatory)][hashtable]$Before,
+        [Parameter(Mandatory)][hashtable]$After
+    )
+    $updated = New-Object System.Collections.Generic.List[string]
+
+    foreach ($k in (@($After.Keys) | Sort-Object)) {
+        $new = $After[$k].Sha
+        $old = if ($Before.ContainsKey($k)) { $Before[$k].Sha } else { $null }
+        if (-not $old) {
+            $updated.Add("  + $k  (新增) -> $($new.Substring(0,8))")
+        }
+        elseif ($old -ne $new) {
+            $updated.Add("  * $k  $($old.Substring(0,8)) -> $($new.Substring(0,8))")
+        }
+    }
+    foreach ($k in (@($Before.Keys) | Sort-Object)) {
+        if (-not $After.ContainsKey($k)) { $updated.Add("  - $k  (已移除)") }
+    }
+    return $updated
+}
+
 function Assert-FileHasText {
     <#  冒烟校验：确认产物里确实含有预期内容，避免"构建成功但产物是空壳" #>
     param(
@@ -292,29 +357,11 @@ if (-not (Test-Path -LiteralPath $LogDir)) { New-Item -ItemType Directory -Path 
 $LogFile = Join-Path $LogDir 'Build-ModLoader-Local.latest.log'
 $Stamp = Get-Date -Format 'yyyy-MM-dd-HH-mm-ss'
 
+# --- 工具链检查 -------------------------------------------------------------
 Write-Section "本地复刻构建: Build-Html-Package.yml  (Windows / PowerShell)"
 Write-Host "  仓库根目录 : $RepoRoot"
 Write-Host "  日志文件   : $LogFile"
 
-# 日志只是辅助：即使写入失败（例如上一次构建还在运行、文件被占用），构建也必须继续。
-$script:TranscriptActive = $false
-try {
-    Start-Transcript -Path $LogFile -Force | Out-Null
-    $script:TranscriptActive = $true
-}
-catch {
-    $LogFile = Join-Path $LogDir "Build-ModLoader-Local.$Stamp.log"
-    try {
-        Start-Transcript -Path $LogFile -Force | Out-Null
-        $script:TranscriptActive = $true
-        Write-Host "  日志提示   : latest 日志被占用，已改用 $LogFile" -ForegroundColor DarkYellow
-    }
-    catch {
-        Write-Host "  日志提示   : 无法写日志（$($_.Exception.Message)），构建继续，输出仅在控制台" -ForegroundColor DarkYellow
-    }
-}
-
-# --- 工具链检查 -------------------------------------------------------------
 Write-Step "检查本机工具链 (Node.js / npm / git / corepack)"
 
 $NodeExe = Get-CommandPath 'node'
@@ -459,6 +506,35 @@ ModLoader\out\$name 缺失。它是 ModLoader 子模块中受版本控制的源�
     }
 }
 
+# ---------------------------------------------------------------------------
+# 开始记录日志。注意必须放在 -Clean 之后：-Clean 会重建输出目录，
+# 若在它之前开启转录，日志会被删掉或写进已删除的文件。
+# 日志只是辅助：即使写入失败（例如上一次构建还在运行、文件被占用），构建也必须继续。
+# ---------------------------------------------------------------------------
+$script:TranscriptActive = $false
+try {
+    Start-Transcript -Path $LogFile -Force | Out-Null
+    $script:TranscriptActive = $true
+}
+catch {
+    $LogFile = Join-Path $LogDir "Build-ModLoader-Local.$Stamp.log"
+    try {
+        Start-Transcript -Path $LogFile -Force | Out-Null
+        $script:TranscriptActive = $true
+        Write-Host "  日志提示   : latest 日志被占用，已改用 $LogFile" -ForegroundColor DarkYellow
+    }
+    catch {
+        Write-Host "  日志提示   : 无法写日志（$($_.Exception.Message)），构建继续，输出仅在控制台" -ForegroundColor DarkYellow
+    }
+}
+
+# -Clean 时顺手清掉更早的带时间戳日志（保留本次正在写的那个）
+if ($Clean -and $script:TranscriptActive) {
+    Get-ChildItem -LiteralPath $LogDir -File -Filter 'Build-ModLoader-Local.*.log' -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -ne $LogFile } |
+        ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue }
+}
+
 # 步骤总数只用于显示进度
 $script:StepTotal = 0
 
@@ -471,13 +547,44 @@ try {
 if (-not $SkipInit) {
     Write-Section '第 1 阶段  /  获取源码 (actions/checkout@v6 + submodules)'
 
-    Write-Step '更新主仓库子模块: DOL (degrees-of-lewdity) 与 ModLoader'
-    Invoke-External -FilePath $GitExe -Arguments @('submodule', 'update', '--init', '--recursive') -WorkingDirectory $RepoRoot
+    # 子模块策略：
+    #   默认 --remote  -> 每个子模块 fetch 远端并检出其跟踪分支的最新 commit
+    #                     (等价于 CI 里新增的 "Update all submodules to latest remote" 步骤)
+    #   -PinnedSubmodules -> 停留在父仓库记录的那个 commit（原 CI 行为）
+    $remoteArgs = if ($PinnedSubmodules) { @() } else { @('--remote') }
+    if ($PinnedSubmodules) {
+        Write-Warn '子模块使用父仓库记录的 commit（-PinnedSubmodules），不拉取最新版本'
+    }
+    else {
+        Write-Info '子模块将 fetch 远端并更新到各自跟踪分支的最新 commit (--remote)'
+    }
+
+    # 记录更新前的状态，便于最后输出「哪些子模块版本变了」
+    $subBefore = @{}
+    foreach ($kv in (Get-SubmoduleRevisions -GitExe $GitExe -BaseDir $RepoRoot).GetEnumerator()) { $subBefore[$kv.Key] = $kv.Value }
+
+    Write-Step '同步并更新主仓库子模块: DOL (degrees-of-lewdity) 与 ModLoader'
+    Invoke-External -FilePath $GitExe -Arguments @('submodule', 'sync', '--recursive') -WorkingDirectory $RepoRoot
+    Invoke-External -FilePath $GitExe -Arguments (@('submodule', 'update', '--init', '--recursive') + $remoteArgs) -WorkingDirectory $RepoRoot
     Write-Ok '主仓库子模块就绪'
 
     Write-Step '更新 ModLoader 内部子模块 (等价于 workflow 的 "init ModLoader" 步骤)'
-    Invoke-External -FilePath $GitExe -Arguments @('submodule', 'update', '--init', '--recursive') -WorkingDirectory $ModLoaderDir
+    Invoke-External -FilePath $GitExe -Arguments @('submodule', 'sync', '--recursive') -WorkingDirectory $ModLoaderDir
+    Invoke-External -FilePath $GitExe -Arguments (@('submodule', 'update', '--init', '--recursive') + $remoteArgs) -WorkingDirectory $ModLoaderDir
     Write-Ok 'ModLoader 子模块就绪'
+
+    # 输出子模块版本变化明细
+    $subAfter = Get-SubmoduleRevisions -GitExe $GitExe -BaseDir $RepoRoot
+    # 注意用 @() 包住：函数返回 List[string] 时 PowerShell 会把它展开成单个字符串，
+    # 直接取 .Count 会失败（StrictMode 下报「找不到属性 Count」）
+    $delta = @(Format-SubmoduleDelta -Before $subBefore -After $subAfter)
+    if ($delta.Count -gt 0) {
+        Write-Ok "共 $($delta.Count) 个子模块被更新到新版本:"
+        foreach ($line in $delta) { Write-Host $line -ForegroundColor Green }
+    }
+    else {
+        Write-Info '所有子模块都已是最新版本'
+    }
 
     Write-Step '获取 SC2 (Lyoko-Jeremie/sugarcube-2_Vrelnir @ TS2)'
     if (Test-Path -LiteralPath (Join-Path $Sc2Dir '.git')) {
@@ -855,9 +962,16 @@ New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 $ReleaseDir = Join-Path $RepoRoot 'release'
 if (-not (Test-Path -LiteralPath $ReleaseDir)) { New-Item -ItemType Directory -Path $ReleaseDir -Force | Out-Null }
 
-# release\ 每次构建都重新生成，避免上一次的旧版本资产混在里面造成误上传
-Get-ChildItem -LiteralPath $ReleaseDir -File -Filter 'DoL-ModLoader-*.zip' -ErrorAction SilentlyContinue |
-    ForEach-Object { Write-Info "清理旧资产 $($_.Name)"; Remove-Item -LiteralPath $_.FullName -Force }
+# release\ 里先清掉「本次将要生成」的同名资产，避免旧版本被误上传；
+# 其它文件（你手工放进去的东西）一律不动。
+$ZipName = "DoL-ModLoader-$Sha.zip"
+$AssetNames = @($ZipName)
+if ($Version) { $AssetNames += "DoL-ModLoader-$Version-$Sha.zip" }
+$AssetNames += 'GameOriginalImagePack.mod.zip'
+foreach ($name in $AssetNames) {
+    $stale = Join-Path $ReleaseDir $name
+    if (Test-Path -LiteralPath $stale) { Write-Info "清理旧资产 $name"; Remove-Item -LiteralPath $stale -Force }
+}
 
 Copy-FileToDir -Source $ModHtml      -TargetDir $OutputDir
 Copy-FileToDir -Source $ModPolyHtml  -TargetDir $OutputDir
@@ -867,7 +981,6 @@ Write-Step 'Copy img (Win): DoL\img -> output\'
 Copy-Item -LiteralPath (Join-Path $DoLDir 'img') -Destination $OutputDir -Recurse -Force
 Write-Ok "已复制 img ($((Get-ChildItem -LiteralPath (Join-Path $OutputDir 'img') -Recurse -File | Measure-Object).Count) 个文件)"
 
-$ZipName = "DoL-ModLoader-$Sha.zip"
 $ZipPath = Join-Path $OutputDir $ZipName
 Write-Step "打包 output\ -> output\$ZipName"
 $entryCount = New-ZipFromDirectory -Directory $OutputDir -ZipPath $ZipPath
