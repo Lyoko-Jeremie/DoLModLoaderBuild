@@ -1,1 +1,8 @@
 .idea
+
+# 本地构建产物（Build-ModLoader-Local.ps1）
+/SC2/
+/output/
+/out-GameOriginalImagePack/
+/release/
+/build-logs/
